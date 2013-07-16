@@ -8,11 +8,13 @@
     var queues = {};
 
     // Register an $.ajaxq function, which follows the $.ajax interface, but allows a queue name which will force only one request per queue to fire.
-    $.ajaxq = function(qname, opts) {
+    $.ajaxq = function(qname, opts, priority) {
 
         if (typeof opts === "undefined") {
             throw ("AjaxQ: queue name is not provided");
         }
+
+        priority = ((typeof priority === "undefined") || (typeof priority !== "boolean")) ? false : priority;
 
         // Will return a Deferred promise object extended with success/error/callback, so that this function matches the interface of $.ajax
         var deferred = $.Deferred(),
@@ -49,7 +51,10 @@
                 cb();
             }
             else {
-                queues[qname].push(cb);
+                if (priority)
+                    queues[qname].unshift(cb);
+                else
+                    queues[qname].push(cb);
             }
         }
 
